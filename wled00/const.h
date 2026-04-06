@@ -399,7 +399,8 @@ static_assert(WLED_MAX_BUSSES <= 32, "WLED_MAX_BUSSES exceeds hard limit");
 #define COL_ORDER_RBG             3
 #define COL_ORDER_BGR             4
 #define COL_ORDER_GBR             5
-#define COL_ORDER_MAX             5
+#define COL_ORDER_WRGB            6           //WRGB, W byte first
+#define COL_ORDER_MAX             6
 
 //ESP-NOW
 #define ESP_NOW_STATE_UNINIT       0

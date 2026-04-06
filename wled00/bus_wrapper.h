@@ -797,21 +797,26 @@ class PolyBus {
     uint8_t cctWW = wwcw & 0xFF, cctCW = (wwcw>>8) & 0xFF;
 
     // reorder channels to selected order
-    switch (co & 0x0F) {
-      default: col.G = g; col.R = r; col.B = b; break; //0 = GRB, default
-      case  1: col.G = r; col.R = g; col.B = b; break; //1 = RGB, common for WS2811
-      case  2: col.G = b; col.R = r; col.B = g; break; //2 = BRG
-      case  3: col.G = r; col.R = b; col.B = g; break; //3 = RBG
-      case  4: col.G = b; col.R = g; col.B = r; break; //4 = BGR
-      case  5: col.G = g; col.R = b; col.B = r; break; //5 = GBR
-    }
-    // upper nibble contains W swap information
-    switch (co >> 4) {
-      default: col.W = w;                break; // no swapping
-      case  1: col.W = col.B; col.B = w; break; // swap W & B
-      case  2: col.W = col.G; col.G = w; break; // swap W & G
-      case  3: col.W = col.R; col.R = w; break; // swap W & R
-      case  4: std::swap(cctWW, cctCW);  break; // swap WW & CW
+    if ((co & 0x0F) == COL_ORDER_WRGB) {
+      // WRGB: W byte first, then R, G, B on the wire
+      col.G = w; col.R = r; col.B = g; col.W = b;
+    } else {
+      switch (co & 0x0F) {
+        default: col.G = g; col.R = r; col.B = b; break; //0 = GRB, default
+        case  1: col.G = r; col.R = g; col.B = b; break; //1 = RGB, common for WS2811
+        case  2: col.G = b; col.R = r; col.B = g; break; //2 = BRG
+        case  3: col.G = r; col.R = b; col.B = g; break; //3 = RBG
+        case  4: col.G = b; col.R = g; col.B = r; break; //4 = BGR
+        case  5: col.G = g; col.R = b; col.B = r; break; //5 = GBR
+      }
+      // upper nibble contains W swap information
+      switch (co >> 4) {
+        default: col.W = w;                break; // no swapping
+        case  1: col.W = col.B; col.B = w; break; // swap W & B
+        case  2: col.W = col.G; col.G = w; break; // swap W & G
+        case  3: col.W = col.R; col.R = w; break; // swap W & R
+        case  4: std::swap(cctWW, cctCW);  break; // swap WW & CW
+      }
     }
 
     switch (busType) {
@@ -1005,6 +1010,11 @@ class PolyBus {
       case I_SS_P98_3: col = (static_cast<B_SS_P98_3*>(busPtr))->GetPixelColor(pix); break;
     }
 
+    // WRGB: reverse the mapping (W is in G position, R in R, G in B, B in W)
+    if ((co & 0x0F) == COL_ORDER_WRGB) {
+      //                    W(=col.G)       R(=col.R)      G(=col.B)       B(=col.W)
+      return ((col.G << 24) | (col.R << 16) | (col.B << 8) | (col.W));
+    }
     // upper nibble contains W swap information
     uint8_t w = col.W;
     switch (co >> 4) {
