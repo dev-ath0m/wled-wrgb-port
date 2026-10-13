@@ -561,6 +561,7 @@ bool deserializeConfig(JsonObject doc, bool fromFS) {
   CJSON(bootPreset, def["ps"]);
   CJSON(turnOnAtBoot, def["on"]); // true
   CJSON(briS, def["bri"]); // 128
+  CJSON(defaultCCT, def[F("cct")]); // -1 = use compiled default (127)
 
   JsonObject interfaces = doc["if"];
 
@@ -1102,6 +1103,7 @@ void serializeConfig(JsonObject root) {
   def["ps"] = bootPreset;
   def["on"] = turnOnAtBoot;
   def["bri"] = briS;
+  def[F("cct")] = defaultCCT;
 
   JsonObject interfaces = root.createNestedObject("if");
 

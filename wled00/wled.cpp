@@ -664,6 +664,9 @@ void WLED::beginStrip()
   strip.setTransition(0); // temporarily prevent transitions to reduce segment copies
   strip.finalizeInit(); // busses created during deserializeConfig() if config existed
   strip.makeAutoSegments();
+  if (defaultCCT >= 0) { // restore persisted white-balance CCT (presets can't survive reboot on this fork, so apply from cfg.json instead)
+    for (unsigned i = 0; i < strip.getSegmentsNum(); i++) strip.getSegment(i).setCCT(defaultCCT);
+  }
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
   doInitBusses = false;
